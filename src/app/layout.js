@@ -1,6 +1,6 @@
 import './globals.css';
 import Navbar from '../components/navbar';
-import Footer from '../Components/footer';
+import Footer from '../components/footer';
 
 export const metadata = {
   title: 'Rent-A-Car',
