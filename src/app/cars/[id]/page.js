@@ -1,83 +1,38 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 
-const cars = [
-  {
-    name: "Toyota Corolla",
-    image: "/images/corolla.jpg",
-    price: "Rs. 1,200 / hour",
-    description:
-      "A reliable sedan known for comfort, fuel efficiency, and smooth drive — perfect for city rides and family trips.",
-  },
-  {
-    name: "Honda Civic",
-    image: "/images/civic.jpg",
-    price: "Rs. 1,500 / hour",
-    description:
-      "A stylish and powerful car with advanced features and sporty looks — ideal for premium rides.",
-  },
-  {
-    name: "Suzuki Alto",
-    image: "/images/alto.jpg",
-    price: "Rs. 800 / hour",
-    description:
-      "Compact and budget-friendly — great for short city commutes with excellent mileage.",
-  },
-  {
-    name: "Kia Sportage",
-    image: "/images/sportage.jpg",
-    price: "Rs. 2,000 / hour",
-    description:
-      "A luxurious SUV with powerful performance, spacious interior, and smooth handling.",
-  },
-  {
-    name: "Suzuki Cultus",
-    image: "/images/cultus.jpg",
-    price: "Rs. 1,000 / hour",
-    description:
-      "A reliable hatchback perfect for small families — affordable, comfortable, and easy to drive.",
-  },
-  {
-    name: "Mehran",
-    image: "/images/mehran.jpg",
-    price: "Rs. 700 / hour",
-    description:
-      "Pakistan’s classic car — affordable, simple, and efficient for basic travel needs.",
-  },
-  {
-    name: "Toyota Prado",
-    image: "/images/prado.jpg",
-    price: "Rs. 1,600 / hour",
-    description:
-      "A powerful SUV designed for luxury and long-distance drives with premium comfort.",
-  },
-  {
-    name: "Hyundai Tucson",
-    image: "/images/hyundai.jpg",
-    price: "Rs. 2,000 / hour",
-    description:
-      "A modern SUV offering both comfort and performance for your family adventures.",
-  },
-  {
-    name: "Toyota Yaris",
-    image: "/images/yaris.jpg",
-    price: "Rs. 1,300 / hour",
-    description:
-      "A stylish and efficient sedan that’s perfect for urban driving and long trips.",
-  },
-];
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabaseClient"; // <-- fixed import
+import Link from "next/link";
 
 export default function CarDetails() {
   const { id } = useParams();
   const router = useRouter();
+  const [car, setCar] = useState(null);
 
-  const car = cars[id];
+  useEffect(() => {
+    async function fetchCar() {
+      const { data, error } = await supabase
+        .from("cars")
+ // <-- exact table name
+        .select("*")
+        .eq("id", Number(id)) // <-- convert string to number
+        .single();
+
+      if (error) {
+        console.error("Error fetching car:", error);
+      } else {
+        setCar(data);
+      }
+    }
+
+    fetchCar();
+  }, [id]);
 
   if (!car) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white text-2xl">
-        Car not found
+        Loading...
       </div>
     );
   }
@@ -93,21 +48,45 @@ export default function CarDetails() {
 
       <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-10">
         <img
-          src={car.image}
+          src={car.image_url || "/fallback.jpg"}
           alt={car.name}
           className="w-full lg:w-1/2 h-80 object-cover rounded-2xl shadow-lg"
         />
+
         <div className="flex-1">
           <h1 className="text-4xl font-bold text-red-500 mb-4">{car.name}</h1>
-          <p className="text-gray-300 mb-6 text-lg">{car.description}</p>
-          <p className="text-xl font-semibold text-red-400 mb-6">
-            {car.price}
+          <p className="text-gray-300 mb-6 text-lg">
+            {car.description || "No description available"}
           </p>
+
+          <p className="text-xl font-semibold text-red-400 mb-6">
+            Rs. {car.price_per_hour} / hour
+          </p>
+
+          <p className="text-gray-300 mb-1">
+            <strong>Color:</strong> {car.color || "N/A"}
+          </p>
+          <p className="text-gray-300 mb-1">
+            <strong>Brand:</strong> {car.brand || "N/A"}
+          </p>
+          <p className="text-gray-300 mb-1">
+            <strong>Transmission:</strong> {car.transmission || "N/A"}
+          </p>
+          <p className="text-gray-300 mb-1">
+            <strong>Fuel:</strong> {car.fuel_type || "N/A"}
+          </p>
+          <p className="text-gray-300 mb-1">
+            <strong>Engine:</strong> {car.engine_capacity || "N/A"}
+          </p>
+          <p className="text-gray-300 mb-1">
+            <strong>Seats:</strong> {car.seating_capacity || "N/A"}
+          </p>
+
           <Link href="/booking">
-  <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full mt-6 transition-all duration-300 shadow-md hover:shadow-red-600/40">
-    Book Now
-  </button>
-</Link>
+            <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full mt-6 transition-all duration-300 shadow-md hover:shadow-red-600/40">
+              Book Now
+            </button>
+          </Link>
         </div>
       </div>
     </section>

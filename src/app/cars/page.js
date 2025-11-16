@@ -1,45 +1,32 @@
-"use client";
+import { getCars } from "../../lib/getCars";
 import Link from "next/link";
 
-const cars = [
-  { name: "Toyota Corolla", image: "/images/corolla.jpg", price: "Rs. 1,200 / hour" },
-  { name: "Honda Civic", image: "/images/civic.jpg", price: "Rs. 1,500 / hour" },
-  { name: "Suzuki Alto", image: "/images/alto.jpg", price: "Rs. 800 / hour" },
-  { name: "Kia Sportage", image: "/images/sportage.jpg", price: "Rs. 2,000 / hour" },
-  { name: "Suzuki Cultus", image: "/images/cultus.jpg", price: "Rs. 1,000 / hour" },
-  { name: "Mehran", image: "/images/mehran.jpg", price: "Rs. 700 / hour" },
-  { name: "Toyota Prado", image: "/images/prado.jpg", price: "Rs. 1,600 / hour" },
-  { name: "Hyundai Tucson", image: "/images/hyundai.jpg", price: "Rs. 2,000 / hour" },
-  { name: "Toyota Yaris", image: "/images/yaris.jpg", price: "Rs. 1,300 / hour" },
-];
+export default async function CarsPage() {
+  const cars = await getCars();
 
-export default function CarsPage() {
   return (
-    <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white py-20 px-6 sm:px-12">
-      <div className="text-center mb-14">
-        <h1 className="text-5xl font-extrabold text-red-500 mb-4">Our Available Cars</h1>
-        <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-          Reliable, affordable, and comfortable rides — perfect for your daily
-          travel, family trips, or weekend getaways.
-        </p>
-      </div>
+    <section className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white py-20 px-6 sm:px-12">
+      <h1 className="text-4xl font-bold text-center mb-12 text-red-500">
+        Available Cars
+      </h1>
 
-      {/* Grid of cars */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-        {cars.map((car, index) => (
-          <Link key={index} href={`/cars/${index}`} passHref>
-            <div className="relative bg-zinc-800/60 backdrop-blur-sm border border-zinc-700 rounded-2xl overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-3 hover:shadow-red-600/40 group cursor-pointer">
-              <div className="overflow-hidden">
-                <img
-                  src={car.image}
-                  alt={car.name}
-                  className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </div>
-              <div className="p-6 text-center">
-                <h3 className="text-2xl font-bold text-white mb-2">{car.name}</h3>
-                <p className="text-lg text-red-500 font-semibold">{car.price}</p>
-              </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+        {cars.map((car) => (
+          <Link key={car.id} href={`/cars/${car.id}`}>
+            <div className="bg-zinc-800 p-4 rounded-xl shadow-lg hover:scale-[1.03] transition cursor-pointer">
+              <img
+                src={car.image_url || "/fallback.jpg"}
+                alt={car.name}
+                className="w-full h-48 object-cover rounded-lg"
+              />
+              <h2 className="text-2xl font-semibold mt-4 text-red-400">
+                {car.name}
+              </h2>
+              <p className="text-gray-300">Color: {car.color || "N/A"}</p>
+
+              <p className="text-lg text-red-500 font-bold mt-2">
+                Rs. {car.price_per_hour} / hour
+              </p>
             </div>
           </Link>
         ))}
