@@ -13,24 +13,25 @@ export default async function CarsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
         {cars.map((car) => (
-          <Link key={car.id} href={`/cars/${car.id}`}>
-            <div className="bg-zinc-800 p-4 rounded-xl shadow-lg hover:scale-[1.03] transition cursor-pointer">
-              <Image
-                src={car.image_url || "/fallback.jpg"}
-                alt={car.name}
-                width={500}        // adjust based on your design
-                height={300}       // adjust based on your design
-                className="w-full h-48 object-cover rounded-lg"
-              />
-              <h2 className="text-2xl font-semibold mt-4 text-red-400">
-                {car.name}
-              </h2>
-              <p className="text-gray-300">Color: {car.color || "N/A"}</p>
-
-              <p className="text-lg text-red-500 font-bold mt-2">
-                Rs. {car.price_per_hour} / hour
-              </p>
-            </div>
+          <Link
+            key={car.id}
+            href={`/cars/${car.id}`}
+            className="block bg-zinc-800 p-4 rounded-xl shadow-lg hover:scale-[1.03] transition cursor-pointer"
+          >
+            <Image
+              src={car.image_url || "/fallback.jpg"}
+              alt={car.name}
+              width={500}          // adjust for your design
+              height={300}         // adjust for your design
+              className="w-full h-48 object-cover rounded-lg"
+            />
+            <h2 className="text-2xl font-semibold mt-4 text-red-400">
+              {car.name}
+            </h2>
+            <p className="text-gray-300">Color: {car.color || "N/A"}</p>
+            <p className="text-lg text-red-500 font-bold mt-2">
+              Rs. {car.price_per_hour} / hour
+            </p>
           </Link>
         ))}
       </div>
