@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabaseClient"; // <-- fixed import
+import { supabase } from "../../../lib/supabaseClient";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CarDetails() {
   const { id } = useParams();
@@ -14,9 +15,8 @@ export default function CarDetails() {
     async function fetchCar() {
       const { data, error } = await supabase
         .from("cars")
- // <-- exact table name
         .select("*")
-        .eq("id", Number(id)) // <-- convert string to number
+        .eq("id", Number(id))
         .single();
 
       if (error) {
@@ -47,9 +47,11 @@ export default function CarDetails() {
       </button>
 
       <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-10">
-        <img
+        <Image
           src={car.image_url || "/fallback.jpg"}
           alt={car.name}
+          width={600}       // adjust width as needed
+          height={400}      // adjust height as needed
           className="w-full lg:w-1/2 h-80 object-cover rounded-2xl shadow-lg"
         />
 

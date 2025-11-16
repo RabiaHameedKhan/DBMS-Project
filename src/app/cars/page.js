@@ -1,5 +1,6 @@
 import { getCars } from "../../lib/getCars";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function CarsPage() {
   const cars = await getCars();
@@ -14,9 +15,11 @@ export default async function CarsPage() {
         {cars.map((car) => (
           <Link key={car.id} href={`/cars/${car.id}`}>
             <div className="bg-zinc-800 p-4 rounded-xl shadow-lg hover:scale-[1.03] transition cursor-pointer">
-              <img
+              <Image
                 src={car.image_url || "/fallback.jpg"}
                 alt={car.name}
+                width={500}        // adjust based on your design
+                height={300}       // adjust based on your design
                 className="w-full h-48 object-cover rounded-lg"
               />
               <h2 className="text-2xl font-semibold mt-4 text-red-400">
