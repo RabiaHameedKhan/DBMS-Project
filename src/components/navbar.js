@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -19,7 +20,6 @@ const Navbar = () => {
   const loggedOutLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
-    { name: "Cars", href: "/cars" },
     { name: "Login", href: "/auth" },
   ];
 
@@ -49,7 +49,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-10 items-center">
+        <div className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -63,11 +63,11 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* Logout button only when logged in */}
+          {/* Logout button as modern standalone button */}
           {user && (
             <button
               onClick={handleLogout}
-              className="text-lg font-semibold text-gray-300 hover:text-[#E63946] transition-all"
+              className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition-all shadow-md"
             >
               Logout
             </button>
@@ -110,7 +110,7 @@ const Navbar = () => {
                 setIsOpen(false);
                 handleLogout();
               }}
-              className="block text-lg font-medium text-gray-300 hover:text-[#E63946] transition-all mx-auto"
+              className="block text-lg font-medium text-gray-300 hover:text-[#E63946] transition-all mx-auto px-4 py-2 bg-red-600 rounded-lg"
             >
               Logout
             </button>

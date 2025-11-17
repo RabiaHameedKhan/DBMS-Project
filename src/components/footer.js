@@ -7,6 +7,21 @@ import useUser from "../utils/useUser";
 const Footer = () => {
   const { user } = useUser();
 
+  const loggedOutLinks = [
+    { name: "Home", href: "/" },
+    { name: "About", href: "/#about" },
+    { name: "Login", href: "/auth" },
+  ];
+
+  const loggedInLinks = [
+    { name: "Home", href: "/" },
+    { name: "About", href: "/#about" },
+    { name: "Cars", href: "/cars" },
+    { name: "Profile", href: "/profile" },
+  ];
+
+  const navLinks = user ? loggedInLinks : loggedOutLinks;
+
   return (
     <footer
       style={{ backgroundColor: "#1C1C1E" }}
@@ -29,17 +44,13 @@ const Footer = () => {
         <div className="md:mx-auto text-center">
           <h3 className="text-xl font-semibold mb-4 text-white">Explore</h3>
           <ul className="space-y-3 text-lg">
-            <li><Link href="/" className="hover:text-[#E63946] transition">Home</Link></li>
-            <li><Link href="/#about" className="hover:text-[#E63946] transition">About</Link></li>
-            <li><Link href="/cars" className="hover:text-[#E63946] transition">Cars</Link></li>
-
-            {!user && (
-              <li><Link href="/auth" className="hover:text-[#E63946] transition">Login</Link></li>
-            )}
-
-            {user && (
-              <li><Link href="/profile" className="hover:text-[#E63946] transition">Profile</Link></li>
-            )}
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <Link href={link.href} className="hover:text-[#E63946] transition">
+                  {link.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 

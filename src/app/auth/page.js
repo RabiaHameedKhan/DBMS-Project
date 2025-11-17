@@ -19,7 +19,6 @@ export default function AuthPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // REAL SUPABASE AUTH LOGIC
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -37,8 +36,8 @@ export default function AuthPage() {
         return;
       }
 
-      alert("Logged in successfully!");
-      router.push("/");
+      // Successful login
+      router.push("/"); // redirect to home page
     } else {
       // -------------------------------
       // SIGNUP
@@ -59,8 +58,9 @@ export default function AuthPage() {
         return;
       }
 
+      // Successful signup
       alert("Account created! Please check your email for verification.");
-      router.push("/");
+      router.push("/"); // redirect to home page
     }
   };
 
@@ -115,7 +115,7 @@ export default function AuthPage() {
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] outline-none"
-                  required={!isSignIn}
+                  required
                 />
               </div>
 

@@ -6,11 +6,13 @@ import { supabase } from "../../lib/supabaseClient";
 import Link from "next/link";
 import Image from "next/image";
 
-
 export default function CarsPage() {
   const [user, setUser] = useState(null);
+  const [cars, setCars] = useState([]); // <-- define cars state
+  const [loading, setLoading] = useState(true); // optional loading state
   const router = useRouter();
 
+  // Check if user is logged in
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
@@ -21,7 +23,23 @@ export default function CarsPage() {
     });
   }, [router]);
 
+  // Fetch cars data from Supabase
+  useEffect(() => {
+    const fetchCars = async () => {
+      const { data, error } = await supabase.from("cars").select("*");
+      if (error) {
+        console.error("Error fetching cars:", error.message);
+      } else {
+        setCars(data || []);
+      }
+      setLoading(false);
+    };
+
+    if (user) fetchCars();
+  }, [user]);
+
   if (!user) return null; // prevent page flash before redirect
+  if (loading) return <p className="text-white text-center mt-20">Loading cars...</p>;
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white py-20 px-6 sm:px-12">
@@ -34,7 +52,7 @@ export default function CarsPage() {
           // Safely get the first image URL
           const firstImage =
             car.image_url && car.image_url.length > 0
-              ? car.image_url[0].trim() // remove any leading/trailing spaces
+              ? car.image_url[0].trim()
               : "/fallback.jpg";
 
           return (
