@@ -38,7 +38,7 @@ export default function AuthPage() {
       }
 
       alert("Logged in successfully!");
-      router.push("/profile");
+      router.push("/");
     } else {
       // -------------------------------
       // SIGNUP
