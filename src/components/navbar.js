@@ -2,16 +2,35 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import useUser from "../utils/useUser";
+import { supabase } from "../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useUser();
+  const router = useRouter();
 
-  const navLinks = [
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/auth");
+  };
+
+  const loggedOutLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
     { name: "Cars", href: "/cars" },
     { name: "Login", href: "/auth" },
   ];
+
+  const loggedInLinks = [
+    { name: "Home", href: "/" },
+    { name: "About", href: "/#about" },
+    { name: "Cars", href: "/cars" },
+    { name: "Profile", href: "/profile" },
+  ];
+
+  const navLinks = user ? loggedInLinks : loggedOutLinks;
 
   return (
     <nav
@@ -19,6 +38,7 @@ const Navbar = () => {
       className="text-white shadow-lg sticky top-0 z-50 border-b border-[#E63946]/30 backdrop-blur-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
         {/* Brand */}
         <Link
           href="/"
@@ -29,7 +49,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-10">
+        <div className="hidden md:flex space-x-10 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -42,6 +62,16 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {/* Logout button only when logged in */}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="text-lg font-semibold text-gray-300 hover:text-[#E63946] transition-all"
+            >
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -73,6 +103,18 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {user && (
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                handleLogout();
+              }}
+              className="block text-lg font-medium text-gray-300 hover:text-[#E63946] transition-all mx-auto"
+            >
+              Logout
+            </button>
+          )}
         </div>
       )}
     </nav>

@@ -143,6 +143,10 @@ export default function CarDetails() {
               <strong>Mileage:</strong> {car.mileage || "N/A"}
             </p>
             <p>
+  <strong>Status:</strong> {car.status || "N/A"}
+</p>
+
+            <p>
               <strong>Other info:</strong> {car.other_info || "N/A"}
             </p>
           </div>

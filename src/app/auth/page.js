@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-  const [isSignIn, setIsSignIn] = useState(true); // toggle between Sign In and Sign Up
+  const [isSignIn, setIsSignIn] = useState(true);
+  const router = useRouter();
 
-  // State for form fields
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -13,18 +15,52 @@ export default function AuthPage() {
     phone: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle submit (for now just log data)
-  const handleSubmit = (e) => {
+  // REAL SUPABASE AUTH LOGIC
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (isSignIn) {
-      console.log("Signing in with:", formData.email, formData.password);
+      // -------------------------------
+      // LOGIN
+      // -------------------------------
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Logged in successfully!");
+      router.push("/profile");
     } else {
-      console.log("Signing up with:", formData);
+      // -------------------------------
+      // SIGNUP
+      // -------------------------------
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            phone: formData.phone,
+          },
+        },
+      });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Account created! Please check your email for verification.");
+      router.push("/");
     }
   };
 
@@ -67,9 +103,9 @@ export default function AuthPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Additional fields only for Sign Up */}
           {!isSignIn && (
             <>
-              {/* Name Field for Signup */}
               <div>
                 <label className="text-gray-300 block mb-1">Full Name</label>
                 <input
@@ -78,11 +114,11 @@ export default function AuthPage() {
                   placeholder="John Doe"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] focus:ring-[#c62828] outline-none"
+                  className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] outline-none"
                   required={!isSignIn}
                 />
               </div>
-              {/* Phone Field for Signup */}
+
               <div>
                 <label className="text-gray-300 block mb-1">Phone</label>
                 <input
@@ -91,13 +127,13 @@ export default function AuthPage() {
                   placeholder="+92 300 1234567"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] focus:ring-[#c62828] outline-none"
+                  className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] outline-none"
                 />
               </div>
             </>
           )}
 
-          {/* Common fields for both forms */}
+          {/* Email */}
           <div>
             <label className="text-gray-300 block mb-1">Email</label>
             <input
@@ -106,11 +142,12 @@ export default function AuthPage() {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] focus:ring-[#c62828] outline-none"
+              className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] outline-none"
               required
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="text-gray-300 block mb-1">Password</label>
             <input
@@ -119,7 +156,7 @@ export default function AuthPage() {
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] focus:ring-[#c62828] outline-none"
+              className="w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border border-gray-700 focus:border-[#c62828] outline-none"
               required
             />
           </div>

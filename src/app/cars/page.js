@@ -1,9 +1,24 @@
-import { getCars } from "../../lib/getCars";
-import Link from "next/link";
-import Image from "next/image";
+"use client";
 
-export default async function CarsPage() {
-  const cars = await getCars();
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabaseClient";
+
+export default function CarsPage() {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.push("/auth"); // redirect to login if not logged in
+      } else {
+        setUser(user);
+      }
+    });
+  }, [router]);
+
+  if (!user) return null; // prevent page flash before redirect
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white py-20 px-6 sm:px-12">
