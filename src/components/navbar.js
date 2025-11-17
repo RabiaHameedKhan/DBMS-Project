@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import useUser from "../utils/useUser";
 import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ const Navbar = () => {
   const loggedOutLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
+    
     { name: "Login", href: "/auth" },
   ];
 
@@ -27,7 +28,6 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
     { name: "Cars", href: "/cars" },
-    { name: "Profile", href: "/profile" },
   ];
 
   const navLinks = user ? loggedInLinks : loggedOutLinks;
@@ -37,8 +37,7 @@ const Navbar = () => {
       style={{ backgroundColor: "#1C1C1E" }}
       className="text-white shadow-lg sticky top-0 z-50 border-b border-[#E63946]/30 backdrop-blur-md"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Brand */}
         <Link
           href="/"
@@ -48,13 +47,13 @@ const Navbar = () => {
           Rent<span className="text-gray-200">-A-Car</span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6">
+        {/* Desktop Menu Links Centered */}
+        <div className="hidden md:flex flex-1 justify-center space-x-10 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className="text-lg font-semibold transition-all duration-300"
+              className="text-lg font-semibold transition-colors duration-300"
               style={{ color: "#D1D5DB" }}
               onMouseEnter={(e) => (e.target.style.color = "#E63946")}
               onMouseLeave={(e) => (e.target.style.color = "#D1D5DB")}
@@ -62,22 +61,44 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+        </div>
 
-          {/* Logout button as modern standalone button */}
-          {user && (
+        {/* Profile + Logout on Right */}
+        {user && (
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Modern Profile Icon */}
+            <Link href="/profile" className="relative group">
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full border-2 border-red-500 object-cover shadow-md hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-300">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+              )}
+              {/* Optional tooltip */}
+              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {user.user_metadata?.name || "User"}
+              </span>
+            </Link>
+
+            {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold transition-all shadow-md"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
             >
               Logout
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden focus:outline-none"
+          className="md:hidden focus:outline-none ml-4"
         >
           {isOpen ? (
             <X className="w-8 h-8 text-[#E63946]" />
@@ -105,15 +126,40 @@ const Navbar = () => {
           ))}
 
           {user && (
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                handleLogout();
-              }}
-              className="block text-lg font-medium text-gray-300 hover:text-[#E63946] transition-all mx-auto px-4 py-2 bg-red-600 rounded-lg"
-            >
-              Logout
-            </button>
+            <div className="flex flex-col items-center space-y-4 mt-4">
+              {/* Profile Icon */}
+              <Link
+                href="/profile"
+                onClick={() => setIsOpen(false)}
+                className="relative group"
+              >
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Profile"
+                    className="w-12 h-12 rounded-full border-2 border-red-500 object-cover shadow-md hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-300">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                )}
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {user.user_metadata?.name || "User"}
+                </span>
+              </Link>
+
+              {/* Logout Button */}
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  handleLogout();
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
+              >
+                Logout
+              </button>
+            </div>
           )}
         </div>
       )}

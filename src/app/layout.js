@@ -1,10 +1,12 @@
+// src/app/layout.js
 import './globals.css';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
+import ToastProvider from "../components/ToastProvider"; // client wrapper
 
 export const metadata = {
-  title: 'Rent-A-Car',
-  description: 'A modern car rental web app built with Next.js',
+  title: "Rent-A-Car",
+  description: "Premium car rentals built with Next.js",
 };
 
 export default function RootLayout({ children }) {
@@ -12,6 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="bg-[#111] text-white">
         <Navbar />
+        <ToastProvider /> {/* Client-side mounted toast */}
         <main>{children}</main>
         <Footer />
       </body>
