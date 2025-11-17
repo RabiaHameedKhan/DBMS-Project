@@ -10,6 +10,7 @@ export default function CarDetails() {
   const { id } = useParams();
   const router = useRouter();
   const [car, setCar] = useState(null);
+  const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
     async function fetchCar() {
@@ -37,6 +38,20 @@ export default function CarDetails() {
     );
   }
 
+  // Trim URLs to avoid leading/trailing spaces
+  const images =
+    car.image_url && car.image_url.length > 0
+      ? car.image_url.map((url) => url.trim())
+      : ["/fallback.jpg"];
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white py-20 px-6 sm:px-12">
       {/* Back button */}
@@ -49,43 +64,89 @@ export default function CarDetails() {
 
       {/* Main car section */}
       <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-start gap-10">
-        {/* Car image */}
-        <div className="w-full lg:w-1/2 rounded-2xl overflow-hidden shadow-2xl">
+        {/* Carousel container */}
+        <div className="w-full lg:w-1/2 relative rounded-2xl overflow-hidden shadow-2xl">
           <Image
-            src={car.image_url || "/fallback.jpg"}
+            src={images[currentImage]}
             alt={car.name}
             width={600}
             height={400}
             className="w-full h-80 object-cover transform hover:scale-105 transition duration-500"
           />
+
+          {/* Carousel controls */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-white text-3xl font-bold p-1 hover:text-red-500 transition"
+              >
+                ◀
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white text-3xl font-bold p-1 hover:text-red-500 transition"
+              >
+                ▶
+              </button>
+            </>
+          )}
+
+          {/* Image indicators */}
+          {images.length > 1 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, index) => (
+                <span
+                  key={index}
+                  className={`w-3 h-3 rounded-full ${
+                    currentImage === index ? "bg-red-500" : "bg-gray-400/50"
+                  }`}
+                ></span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Car info */}
         <div className="flex-1 flex flex-col gap-3">
-          {/* Car name */}
           <h1 className="text-4xl lg:text-5xl font-extrabold text-red-500 mb-2">
             {car.name}
           </h1>
 
-          {/* Car description */}
           <p className="text-gray-300 mb-4 text-lg leading-relaxed">
             {car.description || "No description available."}
           </p>
 
-          {/* Other car details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-200 text-lg">
-            <p><strong>Price per hour:</strong> Rs. {car.price_per_hour}</p>
-            <p><strong>Color:</strong> {car.color || "N/A"}</p>
-            <p><strong>Brand:</strong> {car.brand || "N/A"}</p>
-            <p><strong>Transmission:</strong> {car.transmission || "N/A"}</p>
-            <p><strong>Fuel:</strong> {car.fuel_type || "N/A"}</p>
-            <p><strong>Engine:</strong> {car.engine_capacity || "N/A"}</p>
-            <p><strong>Seats:</strong> {car.seating_capacity || "N/A"}</p>
-            <p><strong>Mileage:</strong> {car.mileage || "N/A"}</p>
-            <p><strong>Other info:</strong> {car.other_info || "N/A"}</p>
+            <p>
+              <strong>Price per hour:</strong> Rs. {car.price_per_hour}
+            </p>
+            <p>
+              <strong>Color:</strong> {car.color || "N/A"}
+            </p>
+            <p>
+              <strong>Brand:</strong> {car.brand || "N/A"}
+            </p>
+            <p>
+              <strong>Transmission:</strong> {car.transmission || "N/A"}
+            </p>
+            <p>
+              <strong>Fuel:</strong> {car.fuel_type || "N/A"}
+            </p>
+            <p>
+              <strong>Engine:</strong> {car.engine_capacity || "N/A"}
+            </p>
+            <p>
+              <strong>Seats:</strong> {car.seating_capacity || "N/A"}
+            </p>
+            <p>
+              <strong>Mileage:</strong> {car.mileage || "N/A"}
+            </p>
+            <p>
+              <strong>Other info:</strong> {car.other_info || "N/A"}
+            </p>
           </div>
 
-          {/* Book Now button */}
           <Link href="/booking">
             <button className="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-red-600/50">
               Book Now
