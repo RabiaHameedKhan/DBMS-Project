@@ -31,20 +31,22 @@ export default function ProfilePage() {
   const [showAccountDetails, setShowAccountDetails] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#111] text-white flex">
+    <div className="min-h-screen bg-[#111] text-white flex flex-col md:flex-row">
       {/* =========================
-          SIDEBAR (DARKER RED)
+          SIDEBAR
       ========================== */}
-      <aside className="w-72 bg-red-900/90 p-8 flex flex-col items-center shadow-2xl shadow-red-950/40 rounded-r-3xl">
+      <aside className="w-full md:w-72 bg-red-900/90 p-6 md:p-8 flex flex-col items-center shadow-2xl shadow-red-950/40 rounded-b-3xl md:rounded-r-3xl md:rounded-b-none">
         {/* Profile Avatar */}
-        <div className="w-28 h-28 rounded-full bg-white/10 flex items-center justify-center border-4 border-white/10 shadow-xl">
-          <User className="w-12 h-12 text-white" />
+        <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center border-4 border-white/10 shadow-xl">
+          <User className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </div>
 
-        <h2 className="mt-4 text-2xl font-bold tracking-wide">{user.name}</h2>
+        <h2 className="mt-4 text-xl md:text-2xl font-bold tracking-wide text-center">
+          {user.name}
+        </h2>
 
         {/* Sidebar Buttons */}
-        <div className="mt-8 space-y-4 w-full">
+        <div className="mt-6 md:mt-8 space-y-4 w-full">
           {/* Account Details Dropdown */}
           <div className="w-full">
             <button
@@ -60,7 +62,7 @@ export default function ProfilePage() {
             </button>
 
             {showAccountDetails && (
-              <div className="mt-3 bg-black/30 border border-white/10 rounded-xl p-4 space-y-2 text-gray-200 animate-fadeIn">
+              <div className="mt-3 bg-black/30 border border-white/10 rounded-xl p-4 space-y-2 text-gray-200 animate-fadeIn text-sm md:text-base">
                 <p>
                   <span className="font-semibold">Name:</span> {user.name}
                 </p>
@@ -75,39 +77,39 @@ export default function ProfilePage() {
             )}
           </div>
 
-         <Link
-  href="/"
-  className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition font-semibold flex justify-between items-center px-4"
-            
->
-  Home
-</Link>
-
+          <Link
+            href="/"
+            className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition font-semibold flex justify-center items-center px-4 text-center"
+          >
+            Home
+          </Link>
         </div>
       </aside>
 
       {/* =========================
           MAIN CONTENT – BOOKINGS
       ========================== */}
-      <main className="flex-1 p-12">
-        <h1 className="text-4xl font-extrabold mb-8">My Bookings</h1>
+      <main className="flex-1 p-6 md:p-12">
+        <h1 className="text-3xl md:text-4xl font-extrabold mb-6 md:mb-8">
+          My Bookings
+        </h1>
 
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
           {bookings.map((b) => (
             <div
               key={b.id}
-              className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-6 hover:shadow-red-900/30 transition-all"
+              className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-4 md:p-6 hover:shadow-red-900/30 transition-all"
             >
               {/* Booking Header */}
-              <div className="flex gap-6">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                 <img
                   src={b.image}
                   alt={b.carName}
-                  className="w-40 h-28 rounded-xl object-cover shadow-lg"
+                  className="w-full md:w-40 h-28 md:h-28 rounded-xl object-cover shadow-lg"
                 />
 
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold">{b.carName}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold">{b.carName}</h3>
                   <p className="text-gray-300 mt-1">
                     Pickup: <span className="font-semibold">{b.pickup}</span>
                   </p>
@@ -120,19 +122,19 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex flex-col justify-between gap-3">
+                <div className="flex flex-row md:flex-col justify-between gap-2 md:gap-3 mt-2 md:mt-0">
                   <button
                     onClick={() =>
                       setExpandedCard(expandedCard === b.id ? null : b.id)
                     }
-                    className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md"
+                    className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md"
                   >
                     View Details
                   </button>
 
                   <button
                     onClick={() => setCancelModal(b.id)}
-                    className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
+                    className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
                   >
                     Cancel Booking
                   </button>
@@ -141,7 +143,7 @@ export default function ProfilePage() {
 
               {/* View Details Dropdown */}
               {expandedCard === b.id && (
-                <div className="mt-6 p-6 bg-black/30 rounded-xl border border-white/10">
+                <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base">
                   <p className="text-gray-300">📅 Date: {b.date}</p>
                   <p className="text-gray-300">💰 Price: {b.price}</p>
                   <p className="text-gray-300">🚗 Car: {b.carName}</p>
@@ -158,8 +160,8 @@ export default function ProfilePage() {
           CANCEL BOOKING MODAL
       ========================== */}
       {cancelModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1C1C1E] p-8 rounded-2xl w-[400px] shadow-2xl border border-white/10">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-[#1C1C1E] p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Cancel Booking?</h2>
               <button onClick={() => setCancelModal(null)}>
@@ -171,7 +173,7 @@ export default function ProfilePage() {
               Are you sure you want to cancel this booking?
             </p>
 
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-4 flex-wrap">
               <button
                 onClick={() => setCancelModal(null)}
                 className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold"
