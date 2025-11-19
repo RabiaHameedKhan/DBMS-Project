@@ -20,7 +20,6 @@ const Navbar = () => {
   const loggedOutLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
-    
     { name: "Login", href: "/auth" },
   ];
 
@@ -47,7 +46,7 @@ const Navbar = () => {
           Rent<span className="text-gray-200">-A-Car</span>
         </Link>
 
-        {/* Desktop Menu Links Centered */}
+        {/* Desktop Menu Links */}
         <div className="hidden md:flex flex-1 justify-center space-x-10 items-center">
           {navLinks.map((link) => (
             <Link
@@ -63,11 +62,10 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Profile + Logout on Right */}
-        {user && (
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Modern Profile Icon */}
-            <Link href="/profile" className="relative group">
+        {/* Profile Icon on Small + Large Screen */}
+        <div className="flex items-center space-x-4">
+          {user && (
+            <Link href="/profile" className="relative group hidden md:block">
               {user.user_metadata?.avatar_url ? (
                 <img
                   src={user.user_metadata.avatar_url}
@@ -79,33 +77,44 @@ const Navbar = () => {
                   <User className="w-6 h-6 text-white" />
                 </div>
               )}
-              {/* Optional tooltip */}
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {user.user_metadata?.name || "User"}
-              </span>
             </Link>
+          )}
 
-            {/* Logout Button */}
+          {/* Logout on Desktop */}
+          {user && (
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
+              className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
             >
               Logout
             </button>
-          </div>
-        )}
-
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden focus:outline-none ml-4"
-        >
-          {isOpen ? (
-            <X className="w-8 h-8 text-[#E63946]" />
-          ) : (
-            <Menu className="w-8 h-8 text-[#E63946]" />
           )}
-        </button>
+
+          {/* Mobile Profile Icon (in navbar top-right) */}
+          {user && (
+            <Link
+              href="/profile"
+              className="md:hidden"
+              onClick={() => setIsOpen(false)}
+            >
+              <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-md">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            </Link>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden focus:outline-none ml-2"
+          >
+            {isOpen ? (
+              <X className="w-8 h-8 text-[#E63946]" />
+            ) : (
+              <Menu className="w-8 h-8 text-[#E63946]" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -125,41 +134,17 @@ const Navbar = () => {
             </Link>
           ))}
 
+          {/* Logout Button (Only if Logged In) */}
           {user && (
-            <div className="flex flex-col items-center space-y-4 mt-4">
-              {/* Profile Icon */}
-              <Link
-                href="/profile"
-                onClick={() => setIsOpen(false)}
-                className="relative group"
-              >
-                {user.user_metadata?.avatar_url ? (
-                  <img
-                    src={user.user_metadata.avatar_url}
-                    alt="Profile"
-                    className="w-12 h-12 rounded-full border-2 border-red-500 object-cover shadow-md hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-300">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
-                )}
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {user.user_metadata?.name || "User"}
-                </span>
-              </Link>
-
-              {/* Logout Button */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleLogout();
-                }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                handleLogout();
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-red-600/50"
+            >
+              Logout
+            </button>
           )}
         </div>
       )}

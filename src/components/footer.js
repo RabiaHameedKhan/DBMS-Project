@@ -68,7 +68,8 @@ const Footer = () => {
 
       <div className="mt-10 border-t border-gray-700 pt-5 text-center text-sm text-gray-400">
         © {new Date().getFullYear()}{" "}
-        <span className="font-semibold text-[#E63946]">Rent-A-Car</span> • Reliable • Affordable • Comfortable
+        <span className="font-semibold text-[#E63946]">Rent-A-Car.</span> • Reliable • Affordable • Comfortable •
+        <span className="font-semibold text-[#E63946]"> Made by Rabia Khan</span>
       </div>
     </footer>
   );
