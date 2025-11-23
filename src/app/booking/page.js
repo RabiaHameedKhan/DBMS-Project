@@ -1,11 +1,8 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { Suspense } from "react";
-
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation"; // import useRouter
+import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 
 /* ---------------- CUSTOM DROPDOWN COMPONENT ---------------- */
@@ -46,10 +43,10 @@ function CustomDropdown({ label, name, value, onChange, options }) {
   );
 }
 
-/* ---------------------- MAIN PAGE ---------------------- */
-export default function BookingPage() {
+/* ---------------------- INTERNAL FORM COMPONENT ---------------------- */
+function BookingForm() {
   const searchParams = useSearchParams();
-  const router = useRouter(); // initialize router
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     date: "",
@@ -67,16 +64,17 @@ export default function BookingPage() {
   // Get logged-in user + car_id from URL
   useEffect(() => {
     async function init() {
-      // Get user
+      // Get logged-in user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) setUserId(user.id);
 
-      // Get car_id from URL
+      // Get ?car_id=
       const cid = searchParams.get("car_id");
       if (cid) setCarId(cid);
     }
+
     init();
   }, [searchParams]);
 
@@ -131,7 +129,6 @@ export default function BookingPage() {
         payment_method: "",
       });
 
-      // Redirect to Profile page after successful booking
       router.push("/profile");
     }
 
@@ -139,7 +136,6 @@ export default function BookingPage() {
   };
 
   return (
-     <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
     <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white flex flex-col items-center justify-center px-6 py-20">
       <div className="bg-zinc-800/70 border border-zinc-700 rounded-2xl p-8 sm:p-10 w-full max-w-lg shadow-lg backdrop-blur-sm">
         <h1 className="text-4xl font-bold text-center text-red-500 mb-6">
@@ -186,7 +182,7 @@ export default function BookingPage() {
             />
           </div>
 
-          {/* With Driver */}
+          {/* Driver */}
           <CustomDropdown
             label="With Driver?"
             name="with_driver"
@@ -198,7 +194,7 @@ export default function BookingPage() {
             ]}
           />
 
-          {/* Payment Method */}
+          {/* Payment */}
           <CustomDropdown
             label="Payment Method"
             name="payment_method"
@@ -226,6 +222,14 @@ export default function BookingPage() {
         </form>
       </div>
     </section>
+  );
+}
+
+/* ---------------------- MAIN PAGE WRAPPER WITH SUSPENSE ---------------------- */
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
+      <BookingForm />
     </Suspense>
   );
 }
