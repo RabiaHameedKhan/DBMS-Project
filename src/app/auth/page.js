@@ -34,6 +34,7 @@ export default function AuthPage() {
         password: formData.password,
       });
 
+
       if (error) {
         showToast(error.message, "error");
         return;
@@ -41,6 +42,8 @@ export default function AuthPage() {
 
       showToast("Logged in successfully!", "success");
       router.push("/"); // redirect to home page
+      console.log("User ID:", data.user.id);  // ✅ correct way
+
     } else {
       // -------------------------------
       // SIGNUP

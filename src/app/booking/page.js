@@ -1,25 +1,135 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { supabase } from "../../lib/supabaseClient";
 
+/* ---------------- CUSTOM DROPDOWN COMPONENT ---------------- */
+function CustomDropdown({ label, name, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label || "Select";
+
+  return (
+    <div className="relative">
+      <label className="block text-gray-300 mb-1">{label}</label>
+      <div
+        onClick={() => setOpen(!open)}
+        className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white
+        cursor-pointer flex justify-between items-center hover:bg-zinc-800 transition-all duration-300"
+      >
+        <span>{selectedLabel}</span>
+        <span className="text-gray-400">▼</span>
+      </div>
+
+      {open && (
+        <ul className="absolute z-20 w-full bg-zinc-900 border border-zinc-700 rounded-lg mt-1 shadow-xl overflow-hidden">
+          {options.map((item) => (
+            <li
+              key={item.value}
+              onClick={() => {
+                onChange({ target: { name, value: item.value } });
+                setOpen(false);
+              }}
+              className="p-3 text-white hover:bg-zinc-700 cursor-pointer transition-all duration-200"
+            >
+              {item.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------- MAIN PAGE ---------------------- */
 export default function BookingPage() {
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    carModel: "",
     date: "",
-    time: "",
-    duration: "",
+    start_time: "",
+    end_time: "",
+    with_driver: "",
+    payment_method: "",
   });
 
+  const [userId, setUserId] = useState(null);
+  const [carId, setCarId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // Get logged-in user + car_id from URL
+  useEffect(() => {
+    async function init() {
+      // Get user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+
+      // Get car_id from URL
+      const cid = searchParams.get("car_id");
+      if (cid) setCarId(cid);
+    }
+    init();
+  }, [searchParams]);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Booking confirmed for ${formData.name} (${formData.carModel})`);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
+
+  if (!userId || !carId) {
+    setMessage("User or car not found. Please login and select a car.");
+    setLoading(false);
+    return;
+  }
+
+  const payload = {
+    car_id: carId,
+    date: formData.date,
+    start_time: formData.start_time,
+    end_time: formData.end_time,
+    with_driver: formData.with_driver,
+    payment_method: formData.payment_method,
   };
+
+  // Get token
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+
+  const res = await fetch("/api/bookings/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    setMessage(data.error || "Something went wrong.");
+  } else {
+    setMessage("Booking successful!");
+    setFormData({
+      date: "",
+      start_time: "",
+      end_time: "",
+      with_driver: "",
+      payment_method: "",
+    });
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white flex flex-col items-center justify-center px-6 py-20">
@@ -29,88 +139,82 @@ export default function BookingPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Date */}
           <div>
-            <label className="block text-gray-300 mb-1">Full Name</label>
+            <label className="block text-gray-300 mb-1">Select Date</label>
             <input
-              type="text"
-              name="name"
+              type="date"
+              name="date"
               onChange={handleChange}
-              value={formData.name}
+              value={formData.date}
               required
-              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white"
             />
           </div>
 
+          {/* Start Time */}
           <div>
-            <label className="block text-gray-300 mb-1">Email</label>
+            <label className="block text-gray-300 mb-1">Start Time</label>
             <input
-              type="email"
-              name="email"
+              type="time"
+              name="start_time"
               onChange={handleChange}
-              value={formData.email}
+              value={formData.start_time}
               required
-              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white"
             />
           </div>
 
+          {/* End Time */}
           <div>
-            <label className="block text-gray-300 mb-1">Car Model</label>
+            <label className="block text-gray-300 mb-1">End Time</label>
             <input
-              type="text"
-              name="carModel"
+              type="time"
+              name="end_time"
               onChange={handleChange}
-              value={formData.carModel}
-              placeholder="e.g. Toyota Corolla"
+              value={formData.end_time}
               required
-              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-1">Date</label>
-              <input
-                type="date"
-                name="date"
-                onChange={handleChange}
-                value={formData.date}
-                required
-                className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
+          {/* With Driver */}
+          <CustomDropdown
+            label="With Driver?"
+            name="with_driver"
+            value={formData.with_driver}
+            onChange={handleChange}
+            options={[
+              { value: "no", label: "No" },
+              { value: "yes", label: "Yes (+ extra cost)" },
+            ]}
+          />
 
-            <div>
-              <label className="block text-gray-300 mb-1">Time</label>
-              <input
-                type="time"
-                name="time"
-                onChange={handleChange}
-                value={formData.time}
-                required
-                className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-gray-300 mb-1">Duration (hours)</label>
-            <input
-              type="number"
-              name="duration"
-              onChange={handleChange}
-              value={formData.duration}
-              min="1"
-              required
-              className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
+          {/* Payment Method */}
+          <CustomDropdown
+            label="Payment Method"
+            name="payment_method"
+            value={formData.payment_method}
+            onChange={handleChange}
+            options={[
+              { value: "cash", label: "Cash" },
+              { value: "card", label: "Credit / Debit Card" },
+              { value: "easypaisa", label: "EasyPaisa" },
+              { value: "jazzcash", label: "JazzCash" },
+            ]}
+          />
 
           <button
             type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-red-600/40"
+            disabled={loading}
+            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 text-white font-semibold py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-red-600/40"
           >
-            Confirm Booking
+            {loading ? "Processing..." : "Confirm Booking"}
           </button>
+
+          {message && (
+            <p className="text-center mt-3 text-gray-300">{message}</p>
+          )}
         </form>
       </div>
     </section>

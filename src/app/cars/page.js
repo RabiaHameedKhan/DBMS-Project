@@ -58,7 +58,7 @@ export default function CarsPage() {
           return (
             <Link
               key={car.id}
-              href={`/cars/${car.id}`}
+              href={`/cars/${car.id}`} // <-- old code
               className="block bg-zinc-800 p-4 rounded-xl shadow-lg hover:scale-[1.03] transition cursor-pointer"
             >
               <Image

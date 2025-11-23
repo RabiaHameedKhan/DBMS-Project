@@ -151,11 +151,12 @@ export default function CarDetails() {
             </p>
           </div>
 
-          <Link href="/booking">
-            <button className="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-red-600/50">
-              Book Now
-            </button>
-          </Link>
+         <Link href={`/booking?car_id=${car.id}`}>
+  <button className="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-red-600/50">
+    Book Now
+  </button>
+</Link>
+
         </div>
       </div>
     </section>
