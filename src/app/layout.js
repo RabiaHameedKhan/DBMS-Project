@@ -4,6 +4,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import ToastProvider from "../components/ToastProvider"; // client wrapper
 import SupabaseProvider from './supabase-provider';
+import Chatbot from '../components/chatbot';
 
 export const metadata = {
   title: "Rent-A-Car",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         <Navbar />
         <ToastProvider /> {/* Client-side mounted toast */}
         <main>{children}</main>
+        <Chatbot/>
         <Footer />
       </SupabaseProvider>
 
