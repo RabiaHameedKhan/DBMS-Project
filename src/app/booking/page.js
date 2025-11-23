@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-
+import { Suspense } from "react";
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation"; // import useRouter
@@ -139,6 +139,7 @@ export default function BookingPage() {
   };
 
   return (
+     <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
     <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white flex flex-col items-center justify-center px-6 py-20">
       <div className="bg-zinc-800/70 border border-zinc-700 rounded-2xl p-8 sm:p-10 w-full max-w-lg shadow-lg backdrop-blur-sm">
         <h1 className="text-4xl font-bold text-center text-red-500 mb-6">
@@ -225,5 +226,6 @@ export default function BookingPage() {
         </form>
       </div>
     </section>
+    </Suspense>
   );
 }
