@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"; // import useRouter
 import { supabase } from "../../lib/supabaseClient";
 
 /* ---------------- CUSTOM DROPDOWN COMPONENT ---------------- */
@@ -45,6 +45,7 @@ function CustomDropdown({ label, name, value, onChange, options }) {
 /* ---------------------- MAIN PAGE ---------------------- */
 export default function BookingPage() {
   const searchParams = useSearchParams();
+  const router = useRouter(); // initialize router
 
   const [formData, setFormData] = useState({
     date: "",
@@ -79,57 +80,59 @@ export default function BookingPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-  if (!userId || !carId) {
-    setMessage("User or car not found. Please login and select a car.");
-    setLoading(false);
-    return;
-  }
+    if (!userId || !carId) {
+      setMessage("User or car not found. Please login and select a car.");
+      setLoading(false);
+      return;
+    }
 
-  const payload = {
-    car_id: carId,
-    date: formData.date,
-    start_time: formData.start_time,
-    end_time: formData.end_time,
-    with_driver: formData.with_driver,
-    payment_method: formData.payment_method,
-  };
+    const payload = {
+      car_id: carId,
+      date: formData.date,
+      start_time: formData.start_time,
+      end_time: formData.end_time,
+      with_driver: formData.with_driver,
+      payment_method: formData.payment_method,
+    };
 
-  // Get token
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData?.session?.access_token;
+    // Get token
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
 
-  const res = await fetch("/api/bookings/add", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    setMessage(data.error || "Something went wrong.");
-  } else {
-    setMessage("Booking successful!");
-    setFormData({
-      date: "",
-      start_time: "",
-      end_time: "",
-      with_driver: "",
-      payment_method: "",
+    const res = await fetch("/api/bookings/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
     });
-  }
 
-  setLoading(false);
-};
+    const data = await res.json();
 
+    if (!res.ok) {
+      setMessage(data.error || "Something went wrong.");
+    } else {
+      setMessage("Booking successful!");
+      setFormData({
+        date: "",
+        start_time: "",
+        end_time: "",
+        with_driver: "",
+        payment_method: "",
+      });
+
+      // Redirect to Profile page after successful booking
+      router.push("/profile");
+    }
+
+    setLoading(false);
+  };
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white flex flex-col items-center justify-center px-6 py-20">

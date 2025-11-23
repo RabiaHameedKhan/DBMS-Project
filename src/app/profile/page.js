@@ -1,34 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function ProfilePage() {
-  // Dummy user (replace with real Supabase user later)
-  const user = {
-    name: "Rabia",
-    email: "rabia@example.com",
-    username: "rabia01",
-  };
-
-  // Dummy bookings until backend is ready
-  const bookings = [
-    {
-      id: 1,
-      carName: "Toyota Corolla 2021",
-      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
-      date: "2025-01-15",
-      pickup: "Karachi",
-      dropoff: "Hyderabad",
-      price: "8500 PKR",
-      status: "Confirmed",
-    },
-  ];
-
+  const [user, setUser] = useState({ name: "", email: "", username: "" });
+  const [bookings, setBookings] = useState([]);
   const [expandedCard, setExpandedCard] = useState(null);
   const [cancelModal, setCancelModal] = useState(null);
   const [showAccountDetails, setShowAccountDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Convert 24-hour time to 12-hour AM/PM
+  function formatTime24to12(time24) {
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  return `${hour}:${minute} ${ampm}`;
+}
+
+
+  // Fetch user info and bookings
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+
+      // Get session
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      // Get user info
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        setUser({
+          name: userData.user.user_metadata?.name || "User",
+          email: userData.user.email,
+          username: userData.user.user_metadata?.username || "username",
+        });
+      }
+
+      // Fetch bookings from API
+      const res = await fetch("/api/bookings/get", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setBookings(data.bookings);
+      else console.log(data.error);
+
+      setLoading(false);
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#111] text-white flex flex-col md:flex-row">
@@ -66,12 +94,12 @@ export default function ProfilePage() {
                 <p>
                   <span className="font-semibold">Name:</span> {user.name}
                 </p>
-                <p>
-                  <span className="font-semibold">Username:</span>{" "}
-                  {user.username}
-                </p>
+               
                 <p>
                   <span className="font-semibold">Email:</span> {user.email}
+                </p>
+                <p>
+                  <span className="font-semibold">Contact No:</span> {user.phone}
                 </p>
               </div>
             )}
@@ -94,66 +122,90 @@ export default function ProfilePage() {
           My Bookings
         </h1>
 
-        <div className="space-y-6 md:space-y-8">
-          {bookings.map((b) => (
-            <div
-              key={b.id}
-              className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-4 md:p-6 hover:shadow-red-900/30 transition-all"
-            >
-              {/* Booking Header */}
-              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                <img
-                  src={b.image}
-                  alt={b.carName}
-                  className="w-full md:w-40 h-28 md:h-28 rounded-xl object-cover shadow-lg"
-                />
+        {loading ? (
+          <p className="text-gray-300">Loading bookings...</p>
+        ) : bookings.length === 0 ? (
+          <p className="text-gray-300">No bookings found.</p>
+        ) : (
+          <div className="space-y-6 md:space-y-8">
+            {bookings.map((b) => (
+              <div
+                key={b.id}
+                className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-4 md:p-6 hover:shadow-red-900/30 transition-all"
+              >
+                {/* Booking Header */}
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                  <img
+                    src={b.image || "/placeholder-car.png"}
+                    alt={b.carName}
+                    className="w-full md:w-40 md:h-40 h-full rounded-xl object-cover shadow-lg"
+                  />
 
-                <div className="flex-1">
-                  <h3 className="text-xl md:text-2xl font-bold">{b.carName}</h3>
-                  <p className="text-gray-300 mt-1">
-                    Pickup: <span className="font-semibold">{b.pickup}</span>
-                  </p>
-                  <p className="text-gray-300">
-                    Dropoff: <span className="font-semibold">{b.dropoff}</span>
-                  </p>
-                  <p className="text-red-400 font-semibold mt-1">
-                    Status: {b.status}
-                  </p>
+                  <div className="flex-1">
+                    <h3 className="text-xl md:text-2xl font-bold">{b.carName}</h3>
+                    <p className="text-gray-300 mt-1">
+                      Type: <span className="font-semibold">{b.car_type}</span>
+                    </p>
+                    <p className="text-gray-300">
+                      Color: <span className="font-semibold">{b.color}</span>
+                    </p>
+                    <p className="text-red-400 font-semibold mt-1">
+                      Status: {b.status}
+                    </p>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex flex-row md:flex-col justify-between gap-2 md:gap-3 mt-2 md:mt-0">
+                    <button
+                      onClick={() =>
+                        setExpandedCard(expandedCard === b.id ? null : b.id)
+                      }
+                      className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md"
+                    >
+                      View Details
+                    </button>
+
+                    <button
+                      onClick={() => setCancelModal(b.id)}
+                      className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
+                    >
+                      Cancel Booking
+                    </button>
+                  </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex flex-row md:flex-col justify-between gap-2 md:gap-3 mt-2 md:mt-0">
-                  <button
-                    onClick={() =>
-                      setExpandedCard(expandedCard === b.id ? null : b.id)
-                    }
-                    className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md"
-                  >
-                    View Details
-                  </button>
-
-                  <button
-                    onClick={() => setCancelModal(b.id)}
-                    className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
-                  >
-                    Cancel Booking
-                  </button>
-                </div>
+                {/* View Details Dropdown – simplified & readable */}
+                {expandedCard === b.id && (
+                  <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base space-y-1 text-gray-300">
+                    <p>
+                      <span className="font-semibold">Date:</span> {b.date}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Start Time:</span>{" "}
+                      {formatTime24to12(b.start_time)}
+                    </p>
+                    <p>
+                      <span className="font-semibold">End Time:</span>{" "}
+                      {formatTime24to12(b.end_time)}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Payment Method:</span>{" "}
+                      {b.payment_method}
+                    </p>
+                    <p>
+                      <span className="font-semibold">With Driver:</span>{" "}
+                      {b.with_driver ? "Yes" : "No"}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Total Price:</span> {"  "}
+                      {b.totalPrice}
+                    </p>
+                  </div>
+                )}
               </div>
-
-              {/* View Details Dropdown */}
-              {expandedCard === b.id && (
-                <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base">
-                  <p className="text-gray-300">📅 Date: {b.date}</p>
-                  <p className="text-gray-300">💰 Price: {b.price}</p>
-                  <p className="text-gray-300">🚗 Car: {b.carName}</p>
-                  <p className="text-gray-300">📍 Pickup: {b.pickup}</p>
-                  <p className="text-gray-300">🏁 Dropoff: {b.dropoff}</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       {/* =========================
@@ -181,9 +233,7 @@ export default function ProfilePage() {
                 No
               </button>
 
-              <button
-                className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
-              >
+              <button className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg">
                 Yes, Cancel
               </button>
             </div>
