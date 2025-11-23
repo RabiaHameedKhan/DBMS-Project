@@ -15,22 +15,20 @@ export default function ProfilePage() {
 
   // Convert 24-hour time to 12-hour AM/PM
   function formatTime24to12(time24) {
-  const [hourStr, minuteStr] = time24.split(":");
-  let hour = parseInt(hourStr, 10);
-  const minute = minuteStr;
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12;
-  if (hour === 0) hour = 12;
-  return `${hour}:${minute} ${ampm}`;
-}
-
+    const [hourStr, minuteStr] = time24.split(":");
+    let hour = parseInt(hourStr, 10);
+    const minute = minuteStr;
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+    return `${hour}:${minute} ${ampm}`;
+  }
 
   // Fetch user info and bookings
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
 
-      // Get session
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
 
@@ -44,7 +42,7 @@ export default function ProfilePage() {
         });
       }
 
-      // Fetch bookings from API
+      // Fetch bookings
       const res = await fetch("/api/bookings/get", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -54,28 +52,54 @@ export default function ProfilePage() {
 
       setLoading(false);
     }
-
     fetchData();
   }, []);
 
+  // Cancel booking function (must be OUTSIDE useEffect)
+const handleCancelBooking = async (bookingId) => {
+  setLoading(true);
+
+  try {
+    // Get token
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    await fetch("/api/bookings/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ booking_id: bookingId }),
+    });
+
+    // Remove from UI immediately
+    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+
+    // Close modal
+    setCancelModal(null);
+
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
   return (
     <div className="min-h-screen bg-[#111] text-white flex flex-col md:flex-row">
-      {/* =========================
-          SIDEBAR
-      ========================== */}
+      {/* Sidebar */}
       <aside className="w-full md:w-72 bg-red-900/90 p-6 md:p-8 flex flex-col items-center shadow-2xl shadow-red-950/40 rounded-b-3xl md:rounded-r-3xl md:rounded-b-none">
-        {/* Profile Avatar */}
         <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center border-4 border-white/10 shadow-xl">
           <User className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </div>
-
         <h2 className="mt-4 text-xl md:text-2xl font-bold tracking-wide text-center">
           {user.name}
         </h2>
 
-        {/* Sidebar Buttons */}
         <div className="mt-6 md:mt-8 space-y-4 w-full">
-          {/* Account Details Dropdown */}
           <div className="w-full">
             <button
               onClick={() => setShowAccountDetails(!showAccountDetails)}
@@ -94,12 +118,8 @@ export default function ProfilePage() {
                 <p>
                   <span className="font-semibold">Name:</span> {user.name}
                 </p>
-               
                 <p>
                   <span className="font-semibold">Email:</span> {user.email}
-                </p>
-                <p>
-                  <span className="font-semibold">Contact No:</span> {user.phone}
                 </p>
               </div>
             )}
@@ -114,9 +134,7 @@ export default function ProfilePage() {
         </div>
       </aside>
 
-      {/* =========================
-          MAIN CONTENT – BOOKINGS
-      ========================== */}
+      {/* Main Content */}
       <main className="flex-1 p-6 md:p-12">
         <h1 className="text-3xl md:text-4xl font-extrabold mb-6 md:mb-8">
           My Bookings
@@ -133,7 +151,6 @@ export default function ProfilePage() {
                 key={b.id}
                 className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-4 md:p-6 hover:shadow-red-900/30 transition-all"
               >
-                {/* Booking Header */}
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                   <img
                     src={b.image || "/placeholder-car.png"}
@@ -154,7 +171,6 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
-                  {/* Buttons */}
                   <div className="flex flex-row md:flex-col justify-between gap-2 md:gap-3 mt-2 md:mt-0">
                     <button
                       onClick={() =>
@@ -174,7 +190,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* View Details Dropdown – simplified & readable */}
                 {expandedCard === b.id && (
                   <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base space-y-1 text-gray-300">
                     <p>
@@ -197,8 +212,7 @@ export default function ProfilePage() {
                       {b.with_driver ? "Yes" : "No"}
                     </p>
                     <p>
-                      <span className="font-semibold">Total Price:</span> {"  "}
-                      {b.totalPrice}
+                      <span className="font-semibold">Total Price:</span> ₹{b.totalPrice}
                     </p>
                   </div>
                 )}
@@ -208,9 +222,7 @@ export default function ProfilePage() {
         )}
       </main>
 
-      {/* =========================
-          CANCEL BOOKING MODAL
-      ========================== */}
+      {/* Cancel Booking Modal */}
       {cancelModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-[#1C1C1E] p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
@@ -233,9 +245,13 @@ export default function ProfilePage() {
                 No
               </button>
 
-              <button className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg">
-                Yes, Cancel
-              </button>
+             <button
+  onClick={() => handleCancelBooking(cancelModal)}
+  className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
+>
+  Yes, Cancel
+</button>
+
             </div>
           </div>
         </div>
