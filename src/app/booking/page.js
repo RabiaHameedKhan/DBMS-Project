@@ -60,17 +60,16 @@ function BookingForm() {
   const [carId, setCarId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showModal, setShowModal] = useState(false); // ✅ NEW STATE
 
-  // Get logged-in user + car_id from URL
+  // Get logged-in user + car_id
   useEffect(() => {
     async function init() {
-      // Get logged-in user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) setUserId(user.id);
 
-      // Get ?car_id=
       const cid = searchParams.get("car_id");
       if (cid) setCarId(cid);
     }
@@ -102,7 +101,6 @@ function BookingForm() {
       payment_method: formData.payment_method,
     };
 
-    // Get token
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData?.session?.access_token;
 
@@ -121,6 +119,8 @@ function BookingForm() {
       setMessage(data.error || "Something went wrong.");
     } else {
       setMessage("Booking successful!");
+
+      // Reset form
       setFormData({
         date: "",
         start_time: "",
@@ -129,7 +129,8 @@ function BookingForm() {
         payment_method: "",
       });
 
-      router.push("/profile");
+      // ✅ Show success modal instead of redirecting immediately
+      setShowModal(true);
     }
 
     setLoading(false);
@@ -221,6 +222,28 @@ function BookingForm() {
           )}
         </form>
       </div>
+
+      {/* ✅ SUCCESS MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-6">
+          <div className="bg-zinc-900 border border-red-600 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
+            <h2 className="text-2xl font-bold text-red-500 mb-3">
+              Booking Confirmed!
+            </h2>
+
+            <p className="text-gray-300 mb-6">
+              We have received your booking details. Our team will contact you shortly. Thank you for choosing us!
+            </p>
+
+            <button
+              onClick={() => router.push("/profile")}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition-all duration-300"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

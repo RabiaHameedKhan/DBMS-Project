@@ -6,7 +6,12 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState({ name: "", email: "", username: "" });
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+
   const [bookings, setBookings] = useState([]);
   const [expandedCard, setExpandedCard] = useState(null);
   const [cancelModal, setCancelModal] = useState(null);
@@ -24,7 +29,7 @@ export default function ProfilePage() {
     return `${hour}:${minute} ${ampm}`;
   }
 
-  // Fetch user info and bookings
+  // Fetch user info + bookings
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -32,61 +37,56 @@ export default function ProfilePage() {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
 
-      // Get user info
+      // Fetch User Info
       const { data: userData } = await supabase.auth.getUser();
+
       if (userData?.user) {
         setUser({
           name: userData.user.user_metadata?.name || "User",
           email: userData.user.email,
-          username: userData.user.user_metadata?.username || "username",
+          phone: userData.user.user_metadata?.phone || "Not provided",
         });
       }
 
-      // Fetch bookings
+      // Fetch Bookings
       const res = await fetch("/api/bookings/get", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (res.ok) setBookings(data.bookings);
-      else console.log(data.error);
 
+      if (res.ok) setBookings(data.bookings);
       setLoading(false);
     }
+
     fetchData();
   }, []);
 
-  // Cancel booking function (must be OUTSIDE useEffect)
-const handleCancelBooking = async (bookingId) => {
-  setLoading(true);
+  // Cancel booking
+  const handleCancelBooking = async (bookingId) => {
+    setLoading(true);
 
-  try {
-    // Get token
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
 
-    await fetch("/api/bookings/delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ booking_id: bookingId }),
-    });
+      await fetch("/api/bookings/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ booking_id: bookingId }),
+      });
 
-    // Remove from UI immediately
-    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      setCancelModal(null);
 
-    // Close modal
-    setCancelModal(null);
-
-  } catch (err) {
-    console.log(err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#111] text-white flex flex-col md:flex-row">
@@ -95,6 +95,7 @@ const handleCancelBooking = async (bookingId) => {
         <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center border-4 border-white/10 shadow-xl">
           <User className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </div>
+
         <h2 className="mt-4 text-xl md:text-2xl font-bold tracking-wide text-center">
           {user.name}
         </h2>
@@ -120,6 +121,9 @@ const handleCancelBooking = async (bookingId) => {
                 </p>
                 <p>
                   <span className="font-semibold">Email:</span> {user.email}
+                </p>
+                <p>
+                  <span className="font-semibold">Phone:</span> {user.phone}
                 </p>
               </div>
             )}
@@ -212,7 +216,8 @@ const handleCancelBooking = async (bookingId) => {
                       {b.with_driver ? "Yes" : "No"}
                     </p>
                     <p>
-                      <span className="font-semibold">Total Price:</span> ₹{b.totalPrice}
+                      <span className="font-semibold">Total Price:</span> ₹
+                      {b.totalPrice}
                     </p>
                   </div>
                 )}
@@ -245,13 +250,12 @@ const handleCancelBooking = async (bookingId) => {
                 No
               </button>
 
-             <button
-  onClick={() => handleCancelBooking(cancelModal)}
-  className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
->
-  Yes, Cancel
-</button>
-
+              <button
+                onClick={() => handleCancelBooking(cancelModal)}
+                className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
+              >
+                Yes, Cancel
+              </button>
             </div>
           </div>
         </div>
