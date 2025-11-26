@@ -51,6 +51,7 @@ export async function GET(req) {
 
       return {
         id: b.id,
+        user_id: b.user_id,
         carName: b.cars?.name || "Unknown",
         car_type: b.cars?.car_type || "Unknown",
         color: b.cars?.color || "Unknown",

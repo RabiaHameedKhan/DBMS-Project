@@ -6,19 +6,15 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
-
+  const [user, setUser] = useState({ name: "", email: "", phone: "" });
   const [bookings, setBookings] = useState([]);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [editBookingId, setEditBookingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const [cancelModal, setCancelModal] = useState(null);
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Convert 24-hour time to 12-hour AM/PM
   function formatTime24to12(time24) {
     const [hourStr, minuteStr] = time24.split(":");
     let hour = parseInt(hourStr, 10);
@@ -29,15 +25,12 @@ export default function ProfilePage() {
     return `${hour}:${minute} ${ampm}`;
   }
 
-  // Fetch user info + bookings
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
 
-      // Fetch User Info
       const { data: userData } = await supabase.auth.getUser();
 
       if (userData?.user) {
@@ -48,7 +41,6 @@ export default function ProfilePage() {
         });
       }
 
-      // Fetch Bookings
       const res = await fetch("/api/bookings/get", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -61,10 +53,8 @@ export default function ProfilePage() {
     fetchData();
   }, []);
 
-  // Cancel booking
   const handleCancelBooking = async (bookingId) => {
     setLoading(true);
-
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
@@ -80,13 +70,70 @@ export default function ProfilePage() {
 
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
       setCancelModal(null);
-
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleEditClick = (booking) => {
+    setEditBookingId(booking.id);
+    setEditForm({
+      car_name: booking.carName,
+      date: booking.date,
+      start_time: booking.start_time,
+      end_time: booking.end_time,
+      with_driver: booking.with_driver,
+      payment_method: booking.payment_method,
+    });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+ const handleSaveBooking = async (bookingId) => {
+  if (!editForm || !bookingId) return;
+
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    const res = await fetch("/api/bookings/update", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: bookingId,
+        date: editForm.date,
+        start_time: editForm.start_time,
+        end_time: editForm.end_time,
+        with_driver: editForm.with_driver,
+        payment_met: editForm.payment_met,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update booking");
+
+    // update frontend state
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, ...editForm } : b))
+    );
+    setEditBookingId(null);
+  } catch (err) {
+    console.log(err);
+    alert(err.message);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-[#111] text-white flex flex-col md:flex-row">
@@ -95,10 +142,7 @@ export default function ProfilePage() {
         <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center border-4 border-white/10 shadow-xl">
           <User className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </div>
-
-        <h2 className="mt-4 text-xl md:text-2xl font-bold tracking-wide text-center">
-          {user.name}
-        </h2>
+        <h2 className="mt-4 text-xl md:text-2xl font-bold tracking-wide text-center">{user.name}</h2>
 
         <div className="mt-6 md:mt-8 space-y-4 w-full">
           <div className="w-full">
@@ -107,28 +151,16 @@ export default function ProfilePage() {
               className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition font-semibold flex justify-between items-center px-4"
             >
               Account Details
-              <ChevronDown
-                className={`transition-transform ${
-                  showAccountDetails ? "rotate-180" : ""
-                }`}
-              />
+              <ChevronDown className={`transition-transform ${showAccountDetails ? "rotate-180" : ""}`} />
             </button>
-
             {showAccountDetails && (
               <div className="mt-3 bg-black/30 border border-white/10 rounded-xl p-4 space-y-2 text-gray-200 animate-fadeIn text-sm md:text-base">
-                <p>
-                  <span className="font-semibold">Name:</span> {user.name}
-                </p>
-                <p>
-                  <span className="font-semibold">Email:</span> {user.email}
-                </p>
-                <p>
-                  <span className="font-semibold">Phone:</span> {user.phone}
-                </p>
+                <p><span className="font-semibold">Name:</span> {user.name}</p>
+                <p><span className="font-semibold">Email:</span> {user.email}</p>
+                <p><span className="font-semibold">Phone:</span> {user.phone}</p>
               </div>
             )}
           </div>
-
           <Link
             href="/"
             className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition font-semibold flex justify-center items-center px-4 text-center"
@@ -140,9 +172,7 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <main className="flex-1 p-6 md:p-12">
-        <h1 className="text-3xl md:text-4xl font-extrabold mb-6 md:mb-8">
-          My Bookings
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold mb-6 md:mb-8">My Bookings</h1>
 
         {loading ? (
           <p className="text-gray-300">Loading bookings...</p>
@@ -156,69 +186,72 @@ export default function ProfilePage() {
                 className="bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/40 p-4 md:p-6 hover:shadow-red-900/30 transition-all"
               >
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                  <img
-                    src={b.image || "/placeholder-car.png"}
-                    alt={b.carName}
-                    className="w-full md:w-40 md:h-40 h-full rounded-xl object-cover shadow-lg"
-                  />
-
+                  <img src={b.image || "/placeholder-car.png"} alt={b.carName} className="w-full md:w-40 md:h-40 h-full rounded-xl object-cover shadow-lg" />
                   <div className="flex-1">
                     <h3 className="text-xl md:text-2xl font-bold">{b.carName}</h3>
-                    <p className="text-gray-300 mt-1">
-                      Type: <span className="font-semibold">{b.car_type}</span>
-                    </p>
-                    <p className="text-gray-300">
-                      Color: <span className="font-semibold">{b.color}</span>
-                    </p>
-                    <p className="text-red-400 font-semibold mt-1">
-                      Status: {b.status}
-                    </p>
+                    <p className="text-gray-300 mt-1">Type: <span className="font-semibold">{b.car_type}</span></p>
+                    <p className="text-gray-300">Color: <span className="font-semibold">{b.color}</span></p>
+                    <p className="text-red-400 font-semibold mt-1">Status: {b.status}</p>
                   </div>
 
                   <div className="flex flex-row md:flex-col justify-between gap-2 md:gap-3 mt-2 md:mt-0">
-                    <button
-                      onClick={() =>
-                        setExpandedCard(expandedCard === b.id ? null : b.id)
-                      }
-                      className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md"
-                    >
-                      View Details
-                    </button>
-
-                    <button
-                      onClick={() => setCancelModal(b.id)}
-                      className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
-                    >
-                      Cancel Booking
-                    </button>
+                    <button onClick={() => setExpandedCard(expandedCard === b.id ? null : b.id)} className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold shadow-md">View Details</button>
+                    <button onClick={() => setCancelModal(b.id)} className="px-4 py-2 md:px-5 md:py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg">Cancel Booking</button>
                   </div>
                 </div>
 
                 {expandedCard === b.id && (
-                  <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base space-y-1 text-gray-300">
-                    <p>
-                      <span className="font-semibold">Date:</span> {b.date}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Start Time:</span>{" "}
-                      {formatTime24to12(b.start_time)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">End Time:</span>{" "}
-                      {formatTime24to12(b.end_time)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Payment Method:</span>{" "}
-                      {b.payment_method}
-                    </p>
-                    <p>
-                      <span className="font-semibold">With Driver:</span>{" "}
-                      {b.with_driver ? "Yes" : "No"}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Total Price:</span> ₹
-                      {b.totalPrice}
-                    </p>
+                  <div className="mt-4 md:mt-6 p-4 md:p-6 bg-black/30 rounded-xl border border-white/10 text-sm md:text-base space-y-2 text-gray-300">
+                    {editBookingId === b.id ? (
+                      <>
+                        <div className="space-y-2">
+                          <label className="block">
+                            <span className="font-semibold">Car Name:</span>
+                            <input type="text" name="car_name" value={editForm.car_name || ""} onChange={handleEditChange} className="w-full mt-1 rounded-lg p-2 bg-black/50 text-white border border-white/20" />
+                          </label>
+
+                          <label className="block">
+                            <span className="font-semibold">Date:</span>
+                            <input type="date" name="date" value={editForm.date || ""} onChange={handleEditChange} className="w-full mt-1 rounded-lg p-2 bg-black/50 text-white border border-white/20" />
+                          </label>
+
+                          <label className="block">
+                            <span className="font-semibold">Start Time:</span>
+                            <input type="time" name="start_time" value={editForm.start_time || ""} onChange={handleEditChange} className="w-full mt-1 rounded-lg p-2 bg-black/50 text-white border border-white/20" />
+                          </label>
+
+                          <label className="block">
+                            <span className="font-semibold">End Time:</span>
+                            <input type="time" name="end_time" value={editForm.end_time || ""} onChange={handleEditChange} className="w-full mt-1 rounded-lg p-2 bg-black/50 text-white border border-white/20" />
+                          </label>
+
+                          <label className="block flex items-center gap-2">
+                            <input type="checkbox" name="with_driver" checked={editForm.with_driver || false} onChange={handleEditChange} className="w-4 h-4 accent-red-600" />
+                            <span className="font-semibold">With Driver</span>
+                          </label>
+
+                          <label className="block">
+                            <span className="font-semibold">Payment Method:</span>
+                            <input type="text" name="payment_method" value={editForm.payment_method || ""} onChange={handleEditChange} className="w-full mt-1 rounded-lg p-2 bg-black/50 text-white border border-white/20" />
+                          </label>
+                        </div>
+
+                        <div className="flex gap-3 mt-3">
+                          <button onClick={() => handleSaveBooking(b.id)} className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 transition font-semibold">Save</button>
+                          <button onClick={() => setEditBookingId(null)} className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold">Cancel</button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p><span className="font-semibold">Date:</span> {b.date}</p>
+                        <p><span className="font-semibold">Start Time:</span> {formatTime24to12(b.start_time)}</p>
+                        <p><span className="font-semibold">End Time:</span> {formatTime24to12(b.end_time)}</p>
+                        <p><span className="font-semibold">Payment Method:</span> {b.payment_method}</p>
+                        <p><span className="font-semibold">With Driver:</span> {b.with_driver ? "Yes" : "No"}</p>
+                        <p><span className="font-semibold">Total Price:</span> {b.totalPrice}</p>
+                        <button onClick={() => handleEditClick(b)} className="mt-3 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold shadow-md">Edit Details</button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -233,29 +266,12 @@ export default function ProfilePage() {
           <div className="bg-[#1C1C1E] p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Cancel Booking?</h2>
-              <button onClick={() => setCancelModal(null)}>
-                <X className="text-gray-300" />
-              </button>
+              <button onClick={() => setCancelModal(null)}><X className="text-gray-300" /></button>
             </div>
-
-            <p className="text-gray-300 mb-6">
-              Are you sure you want to cancel this booking?
-            </p>
-
+            <p className="text-gray-300 mb-6">Are you sure you want to cancel this booking?</p>
             <div className="flex justify-end gap-4 flex-wrap">
-              <button
-                onClick={() => setCancelModal(null)}
-                className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold"
-              >
-                No
-              </button>
-
-              <button
-                onClick={() => handleCancelBooking(cancelModal)}
-                className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg"
-              >
-                Yes, Cancel
-              </button>
+              <button onClick={() => setCancelModal(null)} className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold">No</button>
+              <button onClick={() => handleCancelBooking(cancelModal)} className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800 transition font-semibold shadow-lg">Yes, Cancel</button>
             </div>
           </div>
         </div>
