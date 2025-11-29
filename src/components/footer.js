@@ -56,14 +56,43 @@ const Footer = () => {
 
         {/* Social Media */}
         <div className="text-center md:text-right">
-          <h3 className="text-xl font-semibold mb-4 text-white">Follow Us</h3>
-          <div className="flex justify-center md:justify-end space-x-6">
-            <Link href="#" className="hover:text-[#E63946] transition"><Facebook /></Link>
-            <Link href="#" className="hover:text-[#E63946] transition"><Instagram /></Link>
-            <Link href="#" className="hover:text-[#E63946] transition"><Twitter /></Link>
-            <Link href="#" className="hover:text-[#E63946] transition"><Linkedin /></Link>
-          </div>
-        </div>
+  <h3 className="text-xl font-semibold mb-4 text-white">Follow Us</h3>
+  <div className="flex justify-center md:justify-end space-x-6">
+    <a 
+      href="https://www.facebook.com/login" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="hover:text-[#E63946] transition"
+    >
+      <Facebook />
+    </a>
+    <a 
+      href="https://www.instagram.com/accounts/login/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="hover:text-[#E63946] transition"
+    >
+      <Instagram />
+    </a>
+    <a 
+      href="https://twitter.com/login" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="hover:text-[#E63946] transition"
+    >
+      <Twitter />
+    </a>
+    <a 
+      href="https://www.linkedin.com/login" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="hover:text-[#E63946] transition"
+    >
+      <Linkedin />
+    </a>
+  </div>
+</div>
+
       </div>
 
       <div className="mt-10 border-t border-gray-700 pt-5 text-center text-sm text-gray-400">
