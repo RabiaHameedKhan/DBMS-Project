@@ -24,12 +24,31 @@ export async function POST(req) {
       }
     );
 
+    // Get user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "User not authenticated" }), { status: 401 });
     }
 
+    // CHECK FOR OVERLAPPING BOOKINGS
+  const { data: overlappingBookings, error: overlapError } = await supabase
+  .from("bookings")
+  .select("*")
+  .eq("car_id", car_id)
+  .eq("date", date)
+  .lt("start_time", end_time)   // existing start_time < new end_time
+  .gt("end_time", start_time);  // existing end_time > new start_time
+
+
+    if (overlapError) {
+      return new Response(JSON.stringify({ error: overlapError.message }), { status: 500 });
+    }
+
+    if (overlappingBookings.length > 0) {
+      return new Response(JSON.stringify({ error: "Car not available for this timing" }), { status: 400 });
+    }
+
+    // INSERT BOOKING
     const { data, error } = await supabase
       .from("bookings")
       .insert([
@@ -39,8 +58,8 @@ export async function POST(req) {
           date,
           start_time,
           end_time,
-          with_driver: with_driver === "yes", // convert to boolean
-          payment_method, // fixed typo
+          with_driver: with_driver === "yes",
+          payment_method,
           status: "pending",
         },
       ])
@@ -48,7 +67,6 @@ export async function POST(req) {
       .single();
 
     if (error) {
-      console.log(error);
       return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
 
