@@ -30,7 +30,7 @@ export async function GET(req) {
     if (error)
       return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
-    const driverCost = 1000; // example driver cost
+    const driverCost = 1000; // fixed driver cost
 
     const bookings = bookingsData.map((b) => {
       const start = new Date(`${b.date}T${b.start_time}`);
@@ -57,8 +57,8 @@ export async function GET(req) {
         color: b.cars?.color || "Unknown",
         image: imageUrl,
         date: b.date,
-        start_time: b.start_time, // leave raw, ProfilePage will format
-        end_time: b.end_time,     // leave raw, ProfilePage will format
+        start_time: b.start_time, 
+        end_time: b.end_time,     
         payment_method: b.payment_method,
         with_driver: b.with_driver,
         totalPrice: formatPKR(totalPrice),

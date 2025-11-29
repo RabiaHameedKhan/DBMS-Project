@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 
-/* ---------------- CUSTOM DROPDOWN COMPONENT ---------------- */
+/* CUSTOM DROPDOWN COMPONENT  */
 function CustomDropdown({ label, name, value, onChange, options }) {
   const [open, setOpen] = useState(false);
   const selectedLabel =
@@ -43,7 +43,7 @@ function CustomDropdown({ label, name, value, onChange, options }) {
   );
 }
 
-/* ---------------------- INTERNAL FORM COMPONENT ---------------------- */
+/* Booking Form */
 function BookingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -60,7 +60,7 @@ function BookingForm() {
   const [carId, setCarId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showModal, setShowModal] = useState(false); // ✅ NEW STATE
+  const [showModal, setShowModal] = useState(false); 
 
   // Get logged-in user + car_id
   useEffect(() => {
@@ -104,6 +104,7 @@ function BookingForm() {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData?.session?.access_token;
 
+    //Add bookingss
     const res = await fetch("/api/bookings/add", {
       method: "POST",
       headers: {
@@ -129,7 +130,7 @@ function BookingForm() {
         payment_method: "",
       });
 
-      // ✅ Show success modal instead of redirecting immediately
+      
       setShowModal(true);
     }
 
@@ -223,7 +224,7 @@ function BookingForm() {
         </form>
       </div>
 
-      {/* ✅ SUCCESS MODAL */}
+      {/* Success modal to show after sucessful boking */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-6">
           <div className="bg-zinc-900 border border-red-600 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
@@ -248,7 +249,7 @@ function BookingForm() {
   );
 }
 
-/* ---------------------- MAIN PAGE WRAPPER WITH SUSPENSE ---------------------- */
+/* MAIN PAGE WRAPPER WITH SUSPENSE  */
 export default function BookingPage() {
   return (
     <Suspense fallback={<p className="text-white p-4">Loading...</p>}>

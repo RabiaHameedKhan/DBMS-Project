@@ -38,7 +38,7 @@ export default function CarDetails() {
     );
   }
 
-  // Trim URLs to avoid leading/trailing spaces
+  // Trim URLs to avoid leading spaces
   const images =
     car.image_url && car.image_url.length > 0
       ? car.image_url.map((url) => url.trim())

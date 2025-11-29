@@ -1,3 +1,5 @@
+//chatbott UI
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -41,7 +43,7 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* Floating Chat Icon (smaller) */}
+      {/* Floating Chat Icon  */}
       <div
         onClick={() => setOpen(!open)}
         className="fixed bottom-8 right-8 w-20 h-20 flex items-center justify-center rounded-full cursor-pointer transform hover:scale-110 transition-all duration-300 z-50 bg-red-600 shadow-2xl"
@@ -59,7 +61,7 @@ export default function Chatbot() {
         <div className="fixed z-50 flex justify-center items-center inset-0 md:inset-auto md:bottom-36 md:right-8">
           <div className="w-[90%] max-w-md h-[80%] md:w-96 md:h-[500px] bg-black/80 backdrop-blur-md rounded-xl shadow-2xl border border-red-600 flex flex-col overflow-hidden relative">
 
-            {/* Close Button (Top-Right) */}
+            {/* Close Button */}
             <button
               onClick={() => setOpen(false)}
               className="absolute top-2 right-2 text-white text-xl bg-red-600 hover:bg-red-500 w-8 h-8 flex items-center justify-center rounded-full shadow-lg"

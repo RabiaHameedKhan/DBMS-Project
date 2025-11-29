@@ -1,3 +1,5 @@
+//custom hook for custom toast
+
 "use client";
 import { useState } from "react";
 import Toast from "../components/toast";

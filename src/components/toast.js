@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 
 export default function Toast({ message, type = "success", onClose }) {
-  // Auto-dismiss after 3 seconds
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();

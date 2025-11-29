@@ -90,7 +90,7 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Mobile Profile Icon (in navbar top-right) */}
+          {/* Mobile Profile Iconn */}
           {user && (
             <Link
               href="/profile"

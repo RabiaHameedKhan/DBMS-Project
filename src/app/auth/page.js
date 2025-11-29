@@ -26,9 +26,9 @@ export default function AuthPage() {
     e.preventDefault();
 
     if (isSignIn) {
-      // -------------------------------
+      
       // LOGIN
-      // -------------------------------
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -41,13 +41,13 @@ export default function AuthPage() {
       }
 
       showToast("Logged in successfully!", "success");
-      router.push("/"); // redirect to home page
-      console.log("User ID:", data.user.id);  // ✅ correct way
+      router.push("/"); 
+      console.log("User ID:", data.user.id);  
 
     } else {
-      // -------------------------------
+      
       // SIGNUP
-      // -------------------------------
+      
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -65,7 +65,7 @@ export default function AuthPage() {
       }
 
       showToast("Account created! Check your email for verification.", "success");
-      router.push("/"); // redirect to home page
+      router.push("/"); 
     }
   };
 

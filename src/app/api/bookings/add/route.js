@@ -36,8 +36,8 @@ export async function POST(req) {
   .select("*")
   .eq("car_id", car_id)
   .eq("date", date)
-  .lt("start_time", end_time)   // existing start_time < new end_time
-  .gt("end_time", start_time);  // existing end_time > new start_time
+  .lt("start_time", end_time)  
+  .gt("end_time", start_time);  
 
 
     if (overlapError) {

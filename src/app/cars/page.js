@@ -8,7 +8,7 @@ import Image from "next/image";
 
 export default function CarsPage() {
   const [user, setUser] = useState(null);
-  const [cars, setCars] = useState([]); // <-- define cars state
+  const [cars, setCars] = useState([]); //  define cars state
   const [loading, setLoading] = useState(true); // optional loading state
   const router = useRouter();
 
@@ -16,7 +16,7 @@ export default function CarsPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        router.push("/auth"); // redirect to login if not logged in
+        router.push("/auth"); 
       } else {
         setUser(user);
       }
@@ -38,7 +38,7 @@ export default function CarsPage() {
     if (user) fetchCars();
   }, [user]);
 
-  if (!user) return null; // prevent page flash before redirect
+  if (!user) return null; 
   if (loading) return <p className="text-white text-center mt-20">Loading cars...</p>;
 
   return (
@@ -49,7 +49,7 @@ export default function CarsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
         {cars.map((car) => {
-          // Safely get the first image URL
+          // get the first image URL
           const firstImage =
             car.image_url && car.image_url.length > 0
               ? car.image_url[0].trim()

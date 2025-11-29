@@ -15,7 +15,7 @@ export default function useUser() {
     };
     getSession();
 
-    // Listen to login/logout changes
+  
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user || null);

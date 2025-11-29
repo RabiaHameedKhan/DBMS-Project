@@ -15,6 +15,8 @@ export default function ProfilePage() {
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [loading, setLoading] = useState(true);
 
+
+  //chnages time format of booking
   function formatTime24to12(time24) {
     const [hourStr, minuteStr] = time24.split(":");
     let hour = parseInt(hourStr, 10);
@@ -25,6 +27,7 @@ export default function ProfilePage() {
     return `${hour}:${minute} ${ampm}`;
   }
 
+  //fetch user  data
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -41,6 +44,7 @@ export default function ProfilePage() {
         });
       }
 
+      //get bookings
       const res = await fetch("/api/bookings/get", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,6 +57,7 @@ export default function ProfilePage() {
     fetchData();
   }, []);
 
+  //Delete booking
   const handleCancelBooking = async (bookingId) => {
     setLoading(true);
     try {
@@ -77,6 +82,7 @@ export default function ProfilePage() {
     }
   };
 
+  //Update booking
   const handleEditClick = (booking) => {
     setEditBookingId(booking.id);
     setEditForm({

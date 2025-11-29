@@ -1,8 +1,7 @@
-// src/app/layout.js
 import './globals.css';
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import ToastProvider from "../components/ToastProvider"; // client wrapper
+import ToastProvider from "../components/ToastProvider"; 
 import SupabaseProvider from './supabase-provider';
 import Chatbot from '../components/chatbot';
 
@@ -19,7 +18,7 @@ export default function RootLayout({ children }) {
       <body className="bg-[#111] text-white">
       <SupabaseProvider>
         <Navbar />
-        <ToastProvider /> {/* Client-side mounted toast */}
+        <ToastProvider /> 
         <main>{children}</main>
         <Chatbot/>
         <Footer />
